@@ -99,7 +99,28 @@ ORDER BY PropertyAddress
 ALTER TABLE [Nashville Housing Data for Data Cleaning]
 DROP COLUMN OwnerAddress, TaxDistrict, PropertyAddress, SaleDate
 
-
+-------------------------------------------
+--DELETE DUPLICATE DATA
+With RowNumCte as 
+(
+SELECT *, ROW_NUMBER() OVER(
+PARTITION BY ParcelID,
+			PropertyAddress, 
+			SaleDate,
+			SalePrice,
+			LegalReference
+			ORDER BY 
+				UniqueID) row_num 
+FROM [Nashville Housing Data for Data Cleaning]
+)
+----SELECT *
+DELETE
+FROM [Nashville Housing Data for Data Cleaning]
+WHERE UniqueID NOT IN (
+SELECT UniqueID 
+FROM RowNumCte
+WHERE row_num > 1
+)	
 ---------------------------------------------------------------------------------------------------
 ---ALTERNATIVELY SAVE DATA WITHOUT DUPLICATES INTO A VIEW
 CREATE VIEW UniqueData as 
